@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>TorrServer settings</title>
+</head>
+<body>
+    <div id="TemplateConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="TemplateConfigForm">
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="serverUrl">Server URL</label>
+                        <input id="serverUrl" name="serverUrl" type="text" is="emby-input" />
+                        <div class="fieldDescription">TorrServer address</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="serverUsername">Login</label>
+                        <input id="serverUsername" name="serverUsername" type="text" is="emby-input" />
+                        <div class="fieldDescription">TorrServer login</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="serverPassword">Password</label>
+                        <input id="serverPassword" name="serverPassword" type="text" is="emby-input" />
+                    </div>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="moviesLibrary">Select movie library</label>
+                        <select is="emby-select" id="moviesLibrary" name="moviesLibrary" class="emby-select-withcolor emby-select">
+                            <option value="00000000000000000000000000000000">Disable</option>
+                        </select>
+                    </div>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="tvLibrary">Select tv shows library</label>
+                        <select is="emby-select" id="tvLibrary" name="tvLibrary" class="emby-select-withcolor emby-select">
+                            <option value="00000000000000000000000000000000">Disable</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var TemplateConfig = {
+                pluginUniqueId: 'd8354726-0067-4cf8-9136-65ca639de431',
+                loadLibraries: function (config) {
+                    var self = this;
+                    var movies = document.getElementById("moviesLibrary");
+                    var tv = document.getElementById("tvLibrary");
+
+                    ApiClient.getVirtualFolders()
+                        .then(function (folders) {
+                            folders.forEach(function (folder) {
+                                var id = folder.ItemId + "|";
+                                if (folder.CollectionType === "movies") {
+                                    folder.Locations.forEach(function (location) {
+                                        movies.appendChild(new Option(folder.Name + " [" + location + "]", id + location, false, config.MoviesLibraryId == folder.ItemId && config.MoviesLocation == location));
+                                    });
+                                };
+                                if (folder.CollectionType === "tvshows") {
+                                    folder.Locations.forEach(function (location) {
+                                        tv.appendChild(new Option(folder.Name + " [" + location + "]", id + location, false, config.TvShowsLibraryId == folder.ItemId && config.TvShowsLocation == location));
+                                    });
+                                }
+                            });
+                        });
+                    return true;
+                },
+                check: function () {
+                    ApiClient.getJSON(ApiClient.getUrl("plugins/torrserver/status"))
+                        .then(function (response) { });
+                }
+            };
+
+            document.querySelector('#TemplateConfigPage')
+                .addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId)
+                        .then(function (config) {
+                            document.querySelector('#serverUrl').value = config.ServerUrl;
+                            document.querySelector('#serverUsername').value = config.Username;
+                            document.querySelector('#serverPassword').value = config.Password;
+                            TemplateConfig.loadLibraries(config);
+                            Dashboard.hideLoadingMsg();
+                        });
+                });
+
+            document.querySelector('#TemplateConfigForm')
+                .addEventListener('submit', function (e) {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId)
+                        .then(function (config) {
+                            config.ServerUrl = document.querySelector('#serverUrl').value;
+                            config.Username = document.querySelector('#serverUsername').value;
+                            config.Password = document.querySelector('#serverPassword').value;
+                            const movies = document.querySelector("#moviesLibrary").value.split("|", 2);
+                            if (movies.length == 2) {
+                                config.MoviesLibraryId = movies[0];
+                                config.MoviesLocation = movies[1];
+                            }
+                            else {
+                                config.MoviesLibraryId = "";
+                                config.MoviesLocation = "";
+                            };
+                            const tv = document.querySelector("#tvLibrary").value.split("|", 2);
+                            if (tv.length == 2) {
+                                config.TvShowsLibraryId = tv[0];
+                                config.TvShowsLocation = tv[1];
+                            } else {
+                                config.TvShowsLibraryId = "";
+                                config.TvShowsLocation = "";
+                            };
+                            ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
+                                Dashboard.processPluginConfigurationUpdateResult(result);
+                            });
+                        });
+
+                    e.preventDefault();
+                    return false;
+                });
+        </script>
+    </div>
+</body>
+</html>

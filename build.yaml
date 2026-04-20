@@ -1,0 +1,16 @@
+---
+name: "TorrServer"
+guid: "d8354726-0067-4cf8-9136-65ca639de431"
+version: "0.1.0.0"
+targetAbi: "10.11.0.0"
+framework: "net9.0"
+overview: "Import torrserver items to jellyfin medialibrary"
+description: >
+  This plugin saves items stored on Torrserver in the Jellyfin media library as STRM files.
+category: "General"
+owner: "relbmurg"
+artifacts:
+- "Jellyfin.Plugin.TorrServer.dll"
+changelog: >
+  ## v0.1.0.0
+  - Initial release (basic functionality)
