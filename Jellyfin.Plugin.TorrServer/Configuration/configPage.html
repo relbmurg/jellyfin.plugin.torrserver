@@ -29,14 +29,21 @@
                     <div class="selectContainer">
                         <label class="selectLabel" for="moviesLibrary">Select movie library</label>
                         <select is="emby-select" id="moviesLibrary" name="moviesLibrary" class="emby-select-withcolor emby-select">
-                            <option value="00000000000000000000000000000000">Disable</option>
                         </select>
                     </div>
                     <div class="selectContainer">
                         <label class="selectLabel" for="tvLibrary">Select tv shows library</label>
                         <select is="emby-select" id="tvLibrary" name="tvLibrary" class="emby-select-withcolor emby-select">
-                            <option value="00000000000000000000000000000000">Disable</option>
                         </select>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="cbRemoveTorrent" name="cbRemoveTorrent" />
+                            <span>Remove torrents</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Delete the torrents if the associated item is deleted from the library.
+                        </div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
@@ -54,6 +61,11 @@
                     var self = this;
                     var movies = document.getElementById("moviesLibrary");
                     var tv = document.getElementById("tvLibrary");
+
+                    movies.options.length = 0;
+                    movies.appendChild(new Option("Disable", "00000000000000000000000000000000", true, true));
+                    tv.options.length = 0;
+                    tv.appendChild(new Option("Disable", "00000000000000000000000000000000", true, true));
 
                     ApiClient.getVirtualFolders()
                         .then(function (folders) {
@@ -88,6 +100,7 @@
                             document.querySelector('#serverUsername').value = config.Username;
                             document.querySelector('#serverPassword').value = config.Password;
                             TemplateConfig.loadLibraries(config);
+                            document.querySelector('#cbRemoveTorrent').checked = config.RemoveTorrent;
                             Dashboard.hideLoadingMsg();
                         });
                 });
@@ -117,6 +130,7 @@
                                 config.TvShowsLibraryId = "";
                                 config.TvShowsLocation = "";
                             };
+                            config.RemoveTorrent = document.querySelector('#cbRemoveTorrent').checked;
                             ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
                                 Dashboard.processPluginConfigurationUpdateResult(result);
                             });

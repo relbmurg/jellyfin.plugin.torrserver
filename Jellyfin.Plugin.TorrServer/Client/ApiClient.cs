@@ -7,11 +7,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using static Jellyfin.Plugin.TorrServer.Constants.TorrServer;
 
 namespace Jellyfin.Plugin.TorrServer.Client;
 
-internal class ApiClient(IHttpClientFactory factory, IPluginConfigurationProvider config) : IApiClient
+internal class ApiClient(IHttpClientFactory factory, IPluginConfigurationProvider config, ILogger<ApiClient> logger) : IApiClient
 {
     private readonly JsonSerializerOptions _options = new(JsonSerializerOptions.Default)
     {
@@ -44,11 +45,20 @@ internal class ApiClient(IHttpClientFactory factory, IPluginConfigurationProvide
     {
         using var content = JsonContent.Create(new { action = "list" }, options: _options);
 
-        var response = await Client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-        var data = await response.Content.ReadFromJsonAsync<TorrentItem[]>(cancellation).ConfigureAwait(false);
+        try
+        {
+            var response = await Client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadFromJsonAsync<TorrentItem[]>(cancellation).ConfigureAwait(false);
 
-        return data ?? [];
+            return data ?? [];
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to get torrents list");
+        }
+
+        return [];
     }
 
     public async Task<Playlist> GetPlaylist(string hash, CancellationToken cancellation)
@@ -62,11 +72,47 @@ internal class ApiClient(IHttpClientFactory factory, IPluginConfigurationProvide
 
         using var content = JsonContent.Create(new { action = "get", hash = hash }, options: _options);
 
-        var response = await Client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+        const int maxAttempts = 2;
+        var delay = TimeSpan.FromSeconds(3);
+        for (var i = 0; i < maxAttempts; i++)
+        {
+            try
+            {
+                var response = await Client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
 
-        var torrent = await response.Content.ReadFromJsonAsync<TorrentItem>(cancellation).ConfigureAwait(false);
+                var torrent = await response.Content.ReadFromJsonAsync<TorrentItem>(cancellation).ConfigureAwait(false);
+                if (torrent?.Files.Length == 0)
+                {
+                    await Task.Delay(delay, cancellation).ConfigureAwait(false);
+                    continue;
+                }
 
-        return Playlist.Create(Client.BaseAddress!, torrent ?? new TorrentItem());
+                return Playlist.Create(Client.BaseAddress!, torrent ?? new TorrentItem());
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Failed to get torrent");
+                await Task.Delay(delay, cancellation).ConfigureAwait(false);
+            }
+        }
+
+        return Playlist.Empty;
+    }
+
+    public async Task<bool> Remove(string hash, CancellationToken cancellation)
+    {
+        using var content = JsonContent.Create(new { action = "rem", hash = hash }, options: _options);
+
+        try
+        {
+            var response = await Client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to remove torrent");
+            return false;
+        }
     }
 }

@@ -19,6 +19,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddHttpClient(HttpClientName);
         serviceCollection.AddScoped<ISyncService, SyncService>();
         serviceCollection.AddScoped<IApiClient, ApiClient>();
-        serviceCollection.AddLocalization();
+        serviceCollection.AddHostedService<WatchdogService>();
     }
 }

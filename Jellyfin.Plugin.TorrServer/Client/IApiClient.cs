@@ -19,4 +19,12 @@ internal interface IApiClient
     /// <param name="cancellation">Cancellation token.</param>
     /// <returns>Playlist for torrent.</returns>
     Task<Playlist> GetPlaylist(string hash, CancellationToken cancellation);
+
+    /// <summary>
+    /// Remove torrent by hash.
+    /// </summary>
+    /// <param name="hash">Torrent hash.</param>
+    /// <param name="cancellation">Cancellation token.</param>
+    /// <returns>The task object representing the asynchronous operation.</returns>
+    Task<bool> Remove(string hash, CancellationToken cancellation);
 }

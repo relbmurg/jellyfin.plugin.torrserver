@@ -18,6 +18,8 @@ internal class Playlist
 
     public PlaylistEntry[] Entries => _entries.ToArray();
 
+    public static Playlist Empty { get; } = new();
+
     public static async Task<Playlist> Parse(string source, CancellationToken cancellation)
     {
         var result = new Playlist();

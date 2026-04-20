@@ -35,7 +35,7 @@ internal class SyncService(IPluginConfigurationProvider configProvider, ILibrary
             return;
         }
 
-        var existed = GetExistedHashes(moviesRoots.Concat(showsRoots));
+        var existed = TorrentHashHelper.GetExistedHashes(moviesRoots.Concat(showsRoots));
 
         var torrents = await client.List(cancellation).ConfigureAwait(false);
 
@@ -72,41 +72,6 @@ internal class SyncService(IPluginConfigurationProvider configProvider, ILibrary
         }
 
         logger.LogInformation("Stop");
-        return;
-
-        static HashSet<string> GetExistedHashes(IEnumerable<string> roots)
-        {
-            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            var options = new EnumerationOptions
-            {
-                RecurseSubdirectories = true,
-                IgnoreInaccessible = true,
-                ReturnSpecialDirectories = false
-            };
-
-            foreach (var root in roots)
-            {
-                if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
-                {
-                    continue;
-                }
-
-                foreach (var file in Directory.EnumerateFiles(root, "*", options))
-                {
-                    if (!Path.HasExtension(file))
-                    {
-                        var info = new FileInfo(file);
-                        if (info.Length == 0)
-                        {
-                            result.Add(info.Name);
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
     }
 
     private async Task CreateMediaEntry(string directory, Playlist playlist, Category category, string hash, string[]? parameters = null, CancellationToken cancellation = default)

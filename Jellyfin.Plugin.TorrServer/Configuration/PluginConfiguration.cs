@@ -51,6 +51,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public string TvShowsLocation { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether a torrent should be removed
+    /// from the TS library if the item is removed from the JF library.
+    /// </summary>
+    public bool RemoveTorrent { get; set; }
+
     internal class CustomGuidJsonConverter : JsonGuidConverter
     {
         public override Guid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
