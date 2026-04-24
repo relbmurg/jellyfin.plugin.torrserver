@@ -33,7 +33,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Description => "Saves torrents from TorrServer to STRM files";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("d8354726-0067-4cf8-9136-65ca639de431");
+    public override Guid Id => Guid.Parse(Constants.PluginId);
 
     /// <summary>
     /// Gets the current plugin instance.

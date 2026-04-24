@@ -1,6 +1,6 @@
 using Jellyfin.Plugin.TorrServer.Configuration;
 
-namespace Jellyfin.Plugin.TorrServer;
+namespace Jellyfin.Plugin.TorrServer.Infrastructure;
 
 internal interface IPluginConfigurationProvider
 {

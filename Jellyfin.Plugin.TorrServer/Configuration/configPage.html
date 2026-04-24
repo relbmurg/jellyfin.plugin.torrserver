@@ -31,20 +31,21 @@
                         <select is="emby-select" id="moviesLibrary" name="moviesLibrary" class="emby-select-withcolor emby-select">
                         </select>
                     </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="cbRemoveTorrent" name="cbRemoveTorrent" />
+                            <span>Remove movie torrents</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Delete the movie torrents if the associated item is deleted from the library.
+                        </div>
+                    </div>                    
                     <div class="selectContainer">
                         <label class="selectLabel" for="tvLibrary">Select tv shows library</label>
                         <select is="emby-select" id="tvLibrary" name="tvLibrary" class="emby-select-withcolor emby-select">
                         </select>
                     </div>
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="cbRemoveTorrent" name="cbRemoveTorrent" />
-                            <span>Remove torrents</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">
-                            Delete the torrents if the associated item is deleted from the library.
-                        </div>
-                    </div>
+
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                             <span>Save</span>

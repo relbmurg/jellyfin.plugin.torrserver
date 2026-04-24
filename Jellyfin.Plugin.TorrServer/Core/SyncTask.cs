@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.TorrServer.Core;
+using Jellyfin.Plugin.TorrServer.Abstractions;
 using MediaBrowser.Model.Tasks;
 
-namespace Jellyfin.Plugin.TorrServer;
+namespace Jellyfin.Plugin.TorrServer.Core;
 
 /// <summary>
 /// Sync torrents task.

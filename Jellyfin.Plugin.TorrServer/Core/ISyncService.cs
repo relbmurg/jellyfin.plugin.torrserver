@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jellyfin.Plugin.TorrServer.Core;
+namespace Jellyfin.Plugin.TorrServer.Abstractions;
 
 /// <summary>
 /// Synchronization service.

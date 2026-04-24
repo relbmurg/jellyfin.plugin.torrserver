@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(OS)' == 'Windows_NT'">
-    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)\.jf\AppData\plugins\Jellyfin.Plugin.TorrServer\&quot; /S /I /Y" />
+    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)\.jellyfin\data\plugins\Jellyfin.Plugin.TorrServer\&quot; /S /I /Y" />
   </Target>
 
 </Project>

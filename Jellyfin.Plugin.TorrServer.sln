@@ -1,24 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36930.0
+VisualStudioVersion = 17.14.37216.2 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.TorrServer", "Jellyfin.Plugin.TorrServer\Jellyfin.Plugin.TorrServer.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.TorrServer.Tests", "Jellyfin.Plugin.TorrServer.Tests\Jellyfin.Plugin.TorrServer.Tests.csproj", "{B03C771D-4411-46A8-888E-7DB905FD50D7}"
-EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "jellyfin", "..\..\Program Files\Jellyfin\Server\jellyfin.exe", "{33666876-19B8-CA8A-239F-1436C814A67C}"
-	ProjectSection(DebuggerProjectSystem) = preProject
-		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Program Files\Jellyfin\Server\jellyfin.exe
-		RemoteMachine = SNARK
-		StartingDirectory = C:\Program Files\Jellyfin\Server
-		Environment = Default
-		LaunchingEngine = e55ccc87-77c9-4222-8310-09f38e24c40f
-		UseLegacyDebugEngines = No
-		LaunchSQLEngine = No
-		AttachLaunchAction = No
-		IORedirection = Auto
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,6 +12,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{02EA681E-C
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "jellyfin", ".jellyfin\system\jellyfin.exe", "{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}"
+	ProjectSection(DebuggerProjectSystem) = preProject
+		PortSupplier = 00000000-0000-0000-0000-000000000000
+		Executable = C:\Projects\Jellyfin.Plugin.TorrServer\.jellyfin\system\jellyfin.exe
+		RemoteMachine = SNARK
+		StartingDirectory = C:\Projects\Jellyfin.Plugin.TorrServer\.jellyfin\system
+		Arguments = -d C:\Projects\Jellyfin.Plugin.TorrServer\.jellyfin\data
+		Environment = Default
+		LaunchingEngine = 2e36f1d4-b23c-435d-ab41-18e608940038
+		UseLegacyDebugEngines = No
+		LaunchSQLEngine = No
+		AttachLaunchAction = No
+		IORedirection = Auto
 	EndProjectSection
 EndProject
 Global
@@ -62,12 +63,12 @@ Global
 		{B03C771D-4411-46A8-888E-7DB905FD50D7}.Release|x64.Build.0 = Release|Any CPU
 		{B03C771D-4411-46A8-888E-7DB905FD50D7}.Release|x86.ActiveCfg = Release|Any CPU
 		{B03C771D-4411-46A8-888E-7DB905FD50D7}.Release|x86.Build.0 = Release|Any CPU
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Debug|Any CPU.ActiveCfg = Release|x64
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Debug|x64.ActiveCfg = Release|x64
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Debug|x86.ActiveCfg = Release|x64
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Release|Any CPU.ActiveCfg = Release|x64
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Release|x64.ActiveCfg = Release|x64
-		{33666876-19B8-CA8A-239F-1436C814A67C}.Release|x86.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Debug|Any CPU.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Debug|x64.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Debug|x86.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Release|Any CPU.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Release|x64.ActiveCfg = Release|x64
+		{0D67F384-C356-07CC-6CC2-85CAC7CCB4A6}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

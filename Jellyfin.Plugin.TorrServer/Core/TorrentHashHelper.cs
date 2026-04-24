@@ -6,13 +6,13 @@ namespace Jellyfin.Plugin.TorrServer.Core;
 
 internal static class TorrentHashHelper
 {
-    public static HashSet<string> GetExistedHashes(IEnumerable<string> roots)
+    public static HashSet<string> GetExistedHashes(IEnumerable<string> roots, bool recursive = true)
     {
         var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var options = new EnumerationOptions
         {
-            RecurseSubdirectories = true,
+            RecurseSubdirectories = recursive,
             IgnoreInaccessible = true,
             ReturnSpecialDirectories = false
         };
@@ -24,21 +24,14 @@ internal static class TorrentHashHelper
                 continue;
             }
 
-            foreach (var file in Directory.EnumerateFiles(root, "*", options))
+            foreach (var file in Directory.EnumerateFiles(root, "*.hash", options))
             {
-                if (Path.HasExtension(file))
-                {
-                    continue;
-                }
-
-                var info = new FileInfo(file);
-                if (info.Length == 0)
-                {
-                    result.Add(info.Name);
-                }
+                result.Add(Path.GetFileNameWithoutExtension(file));
             }
         }
 
         return result;
     }
+
+    public static string GetHashFileName(this string hash) => $"{hash}.hash";
 }

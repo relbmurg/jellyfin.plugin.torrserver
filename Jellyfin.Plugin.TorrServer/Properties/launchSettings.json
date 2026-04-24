@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Jellyfin.Plugin.TorrServer": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -5,6 +5,8 @@ namespace Jellyfin.Plugin.TorrServer;
 /// </summary>
 internal static class Constants
 {
+    public const string PluginId = "d835472600674cf8913665ca639de431";
+
     public static class TorrServer
     {
         public const string HttpClientName = "torrServerApiClient";

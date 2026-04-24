@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Jellyfin.Plugin.TorrServer.Extensions;
+﻿using Jellyfin.Plugin.TorrServer.Extensions;
 
 namespace Jellyfin.Plugin.TorrServer.Tests.Extensions.StringExtensions;
 
