@@ -24,7 +24,8 @@ internal sealed class WatchdogService(
     ILogger<WatchdogService> logger) : IHostedService, ISyncService, IDisposable
 {
     private readonly TimeSpan _grace = TimeSpan.FromSeconds(60);
-    private readonly ConcurrentDictionary<string, PendingItem> _pending = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, PendingItem> _removing = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, PendingItem> _blocking = new(StringComparer.OrdinalIgnoreCase);
     private readonly CancellationTokenSource _cts = new();
     private readonly FolderNameParser _folderNameParser = new();
     private readonly FileNameParser _fileNameParser = new();
@@ -65,7 +66,7 @@ internal sealed class WatchdogService(
 
             foreach (var hash in hashes)
             {
-                if (_pending.TryRemove(hash, out var item))
+                if (_removing.TryRemove(hash, out var item))
                 {
                     item.Dispose();
                 }
@@ -101,13 +102,13 @@ internal sealed class WatchdogService(
 
             foreach (var hash in meta.Hashes)
             {
-                if (_pending.TryRemove(hash, out var existing))
+                if (_removing.TryRemove(hash, out var existing))
                 {
                     existing.Dispose();
                 }
 
                 var item = new PendingItem(hash, kind, _cts.Token);
-                if (_pending.TryAdd(hash, item))
+                if (_removing.TryAdd(hash, item))
                 {
                     item.Start(_grace, DeleteTorrent);
                 }
@@ -138,10 +139,10 @@ internal sealed class WatchdogService(
 
         var config = Config;
 
-        var moviesRoots = libraryManager.GetLibraryPaths(config.MoviesLibraryId);
-        var showsRoots = libraryManager.GetLibraryPaths(config.TvShowsLibraryId);
+        var moviesRoot = libraryManager.GetLibraryPaths(config.MoviesLibraryId).FirstOrDefault(x => x.Equals(config.MoviesLocation, StringComparison.OrdinalIgnoreCase));
+        var showsRoot = libraryManager.GetLibraryPaths(config.TvShowsLibraryId).FirstOrDefault(x => x.Equals(config.TvShowsLocation, StringComparison.OrdinalIgnoreCase));
 
-        if (moviesRoots.Length == 0 && showsRoots.Length == 0)
+        if (moviesRoot == null && showsRoot == null)
         {
             logger.LogWarning("Library paths are missing. Skipping");
             return;
@@ -149,20 +150,21 @@ internal sealed class WatchdogService(
 
         var roots = new Dictionary<Category, string?>()
         {
-            { Category.Movie, moviesRoots.FirstOrDefault(x => x.Equals(config.MoviesLocation, StringComparison.OrdinalIgnoreCase)) },
-            { Category.Tv,  showsRoots.FirstOrDefault(x => x.Equals(config.TvShowsLocation, StringComparison.OrdinalIgnoreCase)) },
+            { Category.Movie, moviesRoot },
+            { Category.Tv,  showsRoot },
         };
 
-        var existed = TorrentHashHelper.GetExistedHashes(moviesRoots.Concat(showsRoots));
-
-        var pending = _pending.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existed = TorrentHashHelper.GetExistedHashes(libraryManager.GetLibrariesPaths());
+        var pending = _removing.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var removed = _blocking.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var torrents = await Client.List(cancellation).ConfigureAwait(false);
 
         var filtered = torrents
             .Where(x =>
                 x.Category is Category.Movie or Category.Tv
                 && !existed.Contains(x.Hash)
-                && !pending.Contains(x.Hash));
+                && !pending.Contains(x.Hash)
+                && !removed.Contains(x.Hash));
 
         foreach (var item in filtered)
         {
@@ -237,9 +239,20 @@ internal sealed class WatchdogService(
 
     private async Task DeleteTorrent(PendingItem item, CancellationToken cancellation)
     {
-        if (!_pending.TryRemove(item.Hash, out _))
+        if (!_removing.TryRemove(item.Hash, out _))
         {
             return;
+        }
+
+        var postRemoved = new PendingItem(item.Hash, item.Kind, _cts.Token);
+        if (_blocking.TryAdd(item.Hash, postRemoved))
+        {
+            var settings = await Client.GetConfiguration(cancellation).ConfigureAwait(false);
+            postRemoved.Start(TimeSpan.FromSeconds(settings.TorrentDisconnectTimeout), (deleted, token) =>
+            {
+                _blocking.TryRemove(item.Hash, out _);
+                return Task.CompletedTask;
+            });
         }
 
         var hash = item.Hash;

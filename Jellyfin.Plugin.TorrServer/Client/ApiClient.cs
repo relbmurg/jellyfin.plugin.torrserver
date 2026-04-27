@@ -111,4 +111,23 @@ internal class ApiClient(HttpClient client, ILogger<ApiClient> logger) : IApiCli
             return false;
         }
     }
+
+    public async Task<ServerConfig> GetConfiguration(CancellationToken cancellation)
+    {
+        using var content = JsonContent.Create(new { action = "get" }, options: Options);
+        ServerConfig? settings = null;
+        try
+        {
+            var response = await client.PostAsync("/settings", content, cancellation).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            settings = await response.Content.ReadFromJsonAsync<ServerConfig>(cancellation).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to get server settings - using defaults");
+        }
+
+        return settings ?? new ServerConfig();
+    }
 }

@@ -28,4 +28,11 @@ internal interface IApiClient
     /// <param name="cancellation">Cancellation token.</param>
     /// <returns>The task object representing the asynchronous operation.</returns>
     Task<bool> Remove(string hash, Category category, CancellationToken cancellation);
+
+    /// <summary>
+    /// Gets current torrserver settings.
+    /// </summary>
+    /// <param name="cancellation">Cancellation token.</param>
+    /// <returns>TorrServer configuration.</returns>
+    Task<ServerConfig> GetConfiguration(CancellationToken cancellation);
 }
