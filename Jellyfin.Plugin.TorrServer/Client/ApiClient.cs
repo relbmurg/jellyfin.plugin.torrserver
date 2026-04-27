@@ -40,13 +40,19 @@ internal class ApiClient(HttpClient client, ILogger<ApiClient> logger) : IApiCli
 
     public async Task<Playlist> GetPlaylist(string hash, CancellationToken cancellation)
     {
-        /*
-        var response = await Client.GetAsync($"/playlist?hash={hash}", cancellation).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-        var playlist = await response.Content.ReadAsStringAsync(cancellation).ConfigureAwait(false);
-        var result = await Playlist.Parse(playlist, cancellation).ConfigureAwait(false);
-        */
+        try
+        {
+            var response = await client.GetAsync($"/playlist?hash={hash}", cancellation).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var playlist = await response.Content.ReadAsStringAsync(cancellation).ConfigureAwait(false);
+            return await Playlist.Parse(playlist, cancellation).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to get torrent");
+        }
 
+        /*
         using var content = JsonContent.Create(new { action = "get", hash = hash }, options: Options);
 
         const int maxAttempts = 2;
@@ -73,6 +79,7 @@ internal class ApiClient(HttpClient client, ILogger<ApiClient> logger) : IApiCli
                 await Task.Delay(delay, cancellation).ConfigureAwait(false);
             }
         }
+        */
 
         return Playlist.Empty;
     }

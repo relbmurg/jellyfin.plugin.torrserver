@@ -14,9 +14,15 @@ internal class Playlist
 
     private const string EntryHeader = "#EXTINF";
 
+    private const string VlcOptHeader = "#EXTVLCOPT:input-slave=";
+
     private readonly List<PlaylistEntry> _entries = [];
 
-    public PlaylistEntry[] Entries => _entries.ToArray();
+    private readonly List<PlaylistEntry> _additional = [];
+
+    public IReadOnlyCollection<PlaylistEntry> Entries => _entries.AsReadOnly();
+
+    public IReadOnlyCollection<PlaylistEntry> Additional => _additional.AsReadOnly();
 
     public static Playlist Empty { get; } = new();
 
@@ -58,6 +64,17 @@ internal class Playlist
                 if (line == null)
                 {
                     break;
+                }
+
+                // options
+                if (line.StartsWith(VlcOptHeader, StringComparison.OrdinalIgnoreCase))
+                {
+                    result._additional.AddRange(
+                    line[VlcOptHeader.Length..]
+                        .Split('#', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Select(x => Uri.TryCreate(x, UriKind.Absolute, out var slaveUri) ? slaveUri : null)
+                        .OfType<Uri>()
+                        .Select(x => new PlaylistEntry(x.Segments.Last(), x)));
                 }
 
                 // Additional tags

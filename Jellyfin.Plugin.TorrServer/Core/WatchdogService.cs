@@ -180,9 +180,9 @@ internal sealed class WatchdogService(
             logger.LogInformation("Folder name -> {Folder}", folder);
 
             var playlist = await Client.GetPlaylist(item.Hash, cancellation).ConfigureAwait(false);
-            logger.LogInformation("Playlist received. Items: {ItemsCount}", playlist.Entries.Length);
+            logger.LogInformation("Playlist received. Items: {ItemsCount}", playlist.Entries.Count);
 
-            if (playlist.Entries.Length == 0)
+            if (playlist.Entries.Count == 0)
             {
                 logger.LogWarning("Playlist items are missing, skipping.");
                 continue;
