@@ -1,7 +1,6 @@
 using System;
 using System.Net.Http.Headers;
 using System.Text;
-using Jellyfin.Plugin.TorrServer.Abstractions;
 using Jellyfin.Plugin.TorrServer.Client;
 using Jellyfin.Plugin.TorrServer.Core;
 using Jellyfin.Plugin.TorrServer.Infrastructure;

@@ -88,7 +88,7 @@ internal class Playlist
 
             if (Uri.TryCreate(line, UriKind.Absolute, out var uri))
             {
-                result._entries.Add(new PlaylistEntry(title, uri));
+                result._entries.Add(new PlaylistEntry(!string.IsNullOrWhiteSpace(title) ? title : uri.Segments.Last(), uri));
             }
         }
 
@@ -108,5 +108,10 @@ internal class Playlist
         return result;
     }
 
-    internal record PlaylistEntry(string Title, Uri Uri);
+    internal record PlaylistEntry(string Title, Uri Uri)
+    {
+        public string Title { get; set; } = Title;
+
+        public bool SkipParsing { get; set; }
+    }
 }

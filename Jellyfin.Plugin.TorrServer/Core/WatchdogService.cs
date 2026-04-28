@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.TorrServer.Abstractions;
 using Jellyfin.Plugin.TorrServer.Client;
 using Jellyfin.Plugin.TorrServer.Configuration;
 using Jellyfin.Plugin.TorrServer.Core.Parser;
@@ -133,10 +132,9 @@ internal sealed class WatchdogService(
         _cts.Dispose();
     }
 
-    public async Task ProcessTorrents(CancellationToken cancellation)
+    public async Task ProcessTorrents(IProgress<double> progress, CancellationToken cancellation)
     {
         logger.LogInformation("Start");
-
         var config = Config;
 
         var moviesRoot = libraryManager.GetLibraryPaths(config.MoviesLibraryId).FirstOrDefault(x => x.Equals(config.MoviesLocation, StringComparison.OrdinalIgnoreCase));
@@ -159,7 +157,14 @@ internal sealed class WatchdogService(
         var removed = _blocking.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var torrents = await Client.List(cancellation).ConfigureAwait(false);
 
+        var total = torrents.Length;
+
         var filtered = torrents
+            .Select((item, index) =>
+            {
+                progress.Report((double)index / total * 100);
+                return item;
+            })
             .Where(x =>
                 x.Category is Category.Movie or Category.Tv
                 && !existed.Contains(x.Hash)
@@ -188,16 +193,17 @@ internal sealed class WatchdogService(
                 continue;
             }
 
-            await CreateMediaEntry(Path.Combine(root, folder), playlist, item.Category, item.Hash, cancellation: cancellation).ConfigureAwait(false);
+            await CreateMediaEntry(root, folder, playlist, item.Category, item.Hash, cancellation: cancellation).ConfigureAwait(false);
         }
 
+        progress.Report(100);
         logger.LogInformation("Stop");
     }
 
-    private async Task CreateMediaEntry(string directory, Playlist playlist, Category category, string hash, string[]? parameters = null, CancellationToken cancellation = default)
+    private async Task CreateMediaEntry(string root, string folder, Playlist playlist, Category category, string hash, string[]? parameters = null, CancellationToken cancellation = default)
     {
         var additionalParameters = string.Join("&", parameters ?? []);
-
+        var directory = Path.Combine(root, folder);
         Directory.CreateDirectory(directory);
 
         var hashFilename = hash.GetHashFileName();

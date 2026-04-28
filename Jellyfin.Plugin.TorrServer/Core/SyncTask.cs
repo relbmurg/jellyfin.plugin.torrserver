@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.TorrServer.Abstractions;
 using MediaBrowser.Model.Tasks;
 
 namespace Jellyfin.Plugin.TorrServer.Core;
@@ -27,7 +26,7 @@ public class SyncTask(ISyncService service) : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        await service.ProcessTorrents(cancellationToken).ConfigureAwait(false);
+        await service.ProcessTorrents(progress, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
