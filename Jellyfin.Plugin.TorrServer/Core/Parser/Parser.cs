@@ -6,13 +6,7 @@ internal abstract class Parser
     {
         var context = CreatePipeline().Run(new ParsingContext(input));
 
-        return new ParseResult
-        {
-            Year = context.Year,
-            VersionTags = context.VersionTags,
-            TechnicalTags = context.TechnicalTags,
-            Title = context.Title
-        };
+        return new ParseResult(context);
     }
 
     protected abstract IParsePipeline CreatePipeline();

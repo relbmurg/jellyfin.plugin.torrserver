@@ -1,6 +1,6 @@
 namespace Jellyfin.Plugin.TorrServer.Core.Parser.Steps;
 
-internal class Reconsruct : IParsingStep
+internal class Reconstruct : IParsingStep
 {
     public void Parse(ParsingContext context)
     {

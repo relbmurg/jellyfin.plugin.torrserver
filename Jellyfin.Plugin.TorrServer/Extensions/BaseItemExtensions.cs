@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Jellyfin.Plugin.TorrServer.Client;
 using Jellyfin.Plugin.TorrServer.Core;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;

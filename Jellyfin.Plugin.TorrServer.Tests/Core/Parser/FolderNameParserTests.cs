@@ -1,5 +1,4 @@
 using Jellyfin.Plugin.TorrServer.Core.Parser;
-using Jellyfin.Plugin.TorrServer.Extensions;
 
 namespace Jellyfin.Plugin.TorrServer.Tests.Core.Parser;
 
@@ -28,6 +27,6 @@ public class FolderNameParserTests
         var result = FolderNameParser.Parse(input);
 
         await Assert.That(result.Year).IsEqualTo(expectedYear);
-        await Assert.That(result.FolderName()).IsEqualTo(expectedTitle);
+        await Assert.That(result.FolderName).IsEqualTo(expectedTitle);
     }
 }

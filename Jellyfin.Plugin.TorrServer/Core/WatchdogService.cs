@@ -181,7 +181,7 @@ internal sealed class WatchdogService(
             using var scope = logger.BeginScope(new[] { ("Title", item.Title), ("Hash", item.Hash) });
             logger.LogInformation("Start processing");
 
-            var folder = _folderNameParser.Parse(item.Title).FolderName().ToSafeFileName('.');
+            var folder = _folderNameParser.Parse(item.Title).FolderName.ToSafeFileName('.');
             logger.LogInformation("Folder name -> {Folder}", folder);
 
             var playlist = await Client.GetPlaylist(item.Hash, cancellation).ConfigureAwait(false);
@@ -217,7 +217,7 @@ internal sealed class WatchdogService(
         {
             var title = Path.GetFileName(entry.Title);
             var titlePath = Path.GetDirectoryName(entry.Title) ?? string.Empty;
-            var file = _fileNameParser.Parse(title).StrmFileName().ToSafeFileName(' ');
+            var file = _fileNameParser.Parse(title).StrmFileName.ToSafeFileName(' ');
             var path = Path.Combine(directory, titlePath, file);
             var url = $"{entry.Uri}";
             if (!string.IsNullOrEmpty(additionalParameters))

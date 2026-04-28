@@ -1,5 +1,4 @@
 using Jellyfin.Plugin.TorrServer.Core.Parser;
-using Jellyfin.Plugin.TorrServer.Extensions;
 
 namespace Jellyfin.Plugin.TorrServer.Tests.Core.Parser;
 
@@ -33,7 +32,7 @@ public class FileNameParserTests
 
         var first = FileNameParser.Parse(input);
 
-        var second = FileNameParser.Parse(first.StrmFileName());
+        var second = FileNameParser.Parse(first.StrmFileName);
 
         await Assert.That(second.Title).IsEqualTo(first.Title);
         await Assert.That(second.Year).IsEqualTo(first.Year);
@@ -127,8 +126,8 @@ public class FileNameParserTests
         var r1 = FileNameParser.Parse(input1);
         var r2 = FileNameParser.Parse(input2);
 
-        await Assert.That(r1.FolderName).IsEqualTo(r2.FolderName());
-        await Assert.That(r1.StrmFileName).IsNotEqualTo(r2.StrmFileName());
+        await Assert.That(r1.FolderName).IsEqualTo(r2.FolderName);
+        await Assert.That(r1.StrmFileName).IsNotEqualTo(r2.StrmFileName);
     }
 
     [Test]
@@ -184,7 +183,7 @@ public class FileNameParserTests
         await Assert.That(r1.FolderName).IsEqualTo("Avatar (2009)");
         await Assert.That(r2.FolderName).IsEqualTo("Avatar (2009)");
 
-        await Assert.That(r1.StrmFileName).IsNotEqualTo(r2.StrmFileName());
+        await Assert.That(r1.StrmFileName).IsNotEqualTo(r2.StrmFileName);
     }
 
     [Test]

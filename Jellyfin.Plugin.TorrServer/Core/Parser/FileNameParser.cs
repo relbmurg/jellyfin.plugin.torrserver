@@ -18,7 +18,7 @@ internal sealed class FileNameParser : Parser
             .WithStep(Tokenize)
             .WithStep(new ExtractTechnicalTags())
             .WithStep(new ExtractVersionTags())
-            .WithStep(new Reconsruct())
+            .WithStep(new Reconstruct())
             .WithStep(new ExtractYear())
             .WithStep(new BuildTitle())
             .WithStep(new SanitizeTitle([':'], '.'));
