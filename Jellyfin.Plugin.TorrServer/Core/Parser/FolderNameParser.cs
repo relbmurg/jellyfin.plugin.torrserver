@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using Jellyfin.Plugin.TorrServer.Core.Parser.Steps;
 
@@ -16,7 +17,7 @@ internal sealed class FolderNameParser : Parser
             .WithStep(new RemoveExtension())
             .WithStep(new RemoveLeadingBracket())
             .WithStep(new NormalizeSeparators())
-            .WithStep(new ExtractYear())
+            .WithStep(new ParseYear(true))
             .WithStep(TrimTitleInfo)
             .WithStep(Tokenize)
             .WithStep(new ExtractTechnicalTags())
@@ -27,22 +28,14 @@ internal sealed class FolderNameParser : Parser
 
     private void TrimTitleInfo(ParsingContext context)
     {
-        string input;
-        if (context.Year.HasValue && string.IsNullOrWhiteSpace(context.Title))
-        {
-            input = context.Title.Split(TranslatedNameDelimiters, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0];
-        }
-        else
-        {
-            input = context.WorkingName.Split(TranslatedNameDelimiters, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0];
-            var index = ExtractTechnicalTags.TechnicalSet
-                .Select(tag => input.IndexOf(tag, StringComparison.OrdinalIgnoreCase))
-                .Where(x => x != -1)
-                .DefaultIfEmpty(-1)
-                .Min(x => x);
+        var input = context.WorkingName.Split(TranslatedNameDelimiters, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0];
+        var index = ExtractTechnicalTags.TechnicalSet
+            .Select(tag => input.IndexOf(tag, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x != -1)
+            .DefaultIfEmpty(-1)
+            .Min(x => x);
 
-            input = index >= 0 ? input[..index] : input;
-        }
+        input = index >= 0 ? input[..index] : input;
 
         context.WorkingName = input;
     }

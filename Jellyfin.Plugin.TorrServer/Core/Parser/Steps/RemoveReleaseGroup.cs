@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Immutable;
 using System.Linq;
 using Jellyfin.Plugin.TorrServer.Extensions;
 
@@ -5,6 +7,11 @@ namespace Jellyfin.Plugin.TorrServer.Core.Parser.Steps;
 
 internal class RemoveReleaseGroup : IParsingStep
 {
+    private static ImmutableHashSet<string> ReleaseGroups { get; } = ImmutableHashSet.Create<string>(
+        StringComparer.OrdinalIgnoreCase,
+        "RGzsRutracker",
+        "EniaHD");
+
     public void Parse(ParsingContext context)
     {
         if (context.Tokens.Count == 0)
@@ -24,6 +31,11 @@ internal class RemoveReleaseGroup : IParsingStep
 
         static bool IsReleaseGroup(string token)
         {
+            if (ReleaseGroups.Contains(token))
+            {
+                return true;
+            }
+
             if (token.Length is < 2 or > 15)
             {
                 return false;

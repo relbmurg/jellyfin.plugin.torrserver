@@ -14,6 +14,8 @@ internal class ParseResult(ParsingContext context)
 
     public IReadOnlyList<string> TechnicalTags { get; } = context.TechnicalTags;
 
+    public string SeasonEpisodeTag { get; } = context.SeasonEpisode;
+
     public string FolderName => Year.HasValue ? $"{Title} ({Year})" : Title;
 
     public string StrmFileName
@@ -21,6 +23,11 @@ internal class ParseResult(ParsingContext context)
         get
         {
             var titlePart = Year.HasValue ? $"{Title} ({Year})" : Title;
+            if (!string.IsNullOrWhiteSpace(SeasonEpisodeTag))
+            {
+                titlePart = $"{titlePart} {SeasonEpisodeTag}";
+            }
+
             var versionPart = VersionTags.Count > 0 ? $" [{string.Join(" ", VersionTags)}]" : string.Empty;
             var techPart = TechnicalTags.Count > 0 ? $" [{string.Join(" ", TechnicalTags)}]" : string.Empty;
             return $"{titlePart}{versionPart}{techPart}.strm";

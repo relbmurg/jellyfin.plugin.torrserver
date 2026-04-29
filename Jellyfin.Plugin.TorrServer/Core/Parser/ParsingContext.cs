@@ -16,5 +16,7 @@ internal class ParsingContext(string original)
 
     public List<string> Tokens { get; } = [];
 
+    public string SeasonEpisode { get; set; } = string.Empty;
+
     public string Title { get; set; } = string.Empty;
 }

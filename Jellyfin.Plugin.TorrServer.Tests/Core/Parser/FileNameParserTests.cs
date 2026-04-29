@@ -17,6 +17,8 @@ public class FileNameParserTests
     [Arguments("x264.720p.WEB-DL.Interstellar.2014..mkv", "Interstellar", 2014)]
     [Arguments("No.Year.Movie.1080p.mkv", "No Year Movie", null)]
     [Arguments("The.Hitchhiker's.Guide.to.the.Galaxy.2005.1080p.BluRay.5xRus.3xEng.HDCLUB-Skazhutin.mkv", "The Hitchhiker's Guide to the Galaxy", 2005)]
+    [Arguments("Invasion.S02E01.WEBDL.1080p.RGzsRutracker.mkv", "Invasion", null)]
+    [Arguments("Invasion.2021.S03E02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "Invasion", 2021)]
     public async Task Parse_Should_Parse_Title_And_Year_Correctly(string input, string expectedTitle, int? expectedYear)
     {
         var result = FileNameParser.Parse(input);
@@ -217,13 +219,13 @@ public class FileNameParserTests
     }
 
     [Test]
-    public async Task Parse_Should_Not_Remove_Dash_In_Digits()
+    [Arguments("Invasion.2021.S03E02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S03E02")]
+    [Arguments("Invasion.2021.3x02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S3E02")]
+    [Arguments("Invasion.2021.01-10.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S01E10")]
+    public async Task Parse_Should_Parse_SeasonEpisode(string input, string expected)
     {
-        var input = "Battlestar Galactica 00-01.mkv";
-
         var result = FileNameParser.Parse(input);
 
-        await Assert.That(result.Title).IsEqualTo("Battlestar Galactica 00-01");
+        await Assert.That(result.SeasonEpisodeTag).IsEqualTo(expected);
     }
-
 }

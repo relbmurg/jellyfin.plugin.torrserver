@@ -14,6 +14,7 @@ internal class ExtractTechnicalTags : IParsingStep
         "8K",
         "BluRay",
         "WEB-DL",
+        "WEBDL",
         "WEBRip",
         "HDRip",
         "BDRip",
