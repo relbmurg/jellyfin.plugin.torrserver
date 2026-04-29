@@ -173,6 +173,11 @@ internal sealed class WatchdogService(
 
         foreach (var item in filtered)
         {
+            if (cancellation.IsCancellationRequested)
+            {
+                break;
+            }
+
             if (!roots.TryGetValue(item.Category, out var root) || string.IsNullOrWhiteSpace(root))
             {
                 continue;
@@ -181,7 +186,13 @@ internal sealed class WatchdogService(
             using var scope = logger.BeginScope(new[] { ("Title", item.Title), ("Hash", item.Hash) });
             logger.LogInformation("Start processing");
 
-            var folder = _folderNameParser.Parse(item.Title).FolderName.ToSafeFileName('.');
+            var parseResult = _folderNameParser.Parse(item.Title);
+            var folder = parseResult.FolderName.ToSafeFileName('.');
+            if (item.Category == Category.Tv && FindFolder(root, parseResult, out var exists))
+            {
+                folder = exists;
+            }
+
             logger.LogInformation("Folder name -> {Folder}", folder);
 
             var playlist = await Client.GetPlaylist(item.Hash, cancellation).ConfigureAwait(false);
@@ -200,6 +211,20 @@ internal sealed class WatchdogService(
         logger.LogInformation("Stop");
     }
 
+    private bool FindFolder(string root, ParseResult parseResult, out string folder)
+    {
+        var match = Directory.EnumerateDirectories(root, $"{parseResult.Title}*", SearchOption.TopDirectoryOnly)
+             .FirstOrDefault(x =>
+             {
+                 var res = _folderNameParser.Parse(Path.GetFileName(x).Replace('.', ':'));
+                 return res.Title.Equals(parseResult.Title, StringComparison.OrdinalIgnoreCase);
+             });
+
+        folder = match == null ? string.Empty : Path.GetFileName(match);
+
+        return match != null;
+    }
+
     private async Task CreateMediaEntry(string root, string folder, Playlist playlist, Category category, string hash, string[]? parameters = null, CancellationToken cancellation = default)
     {
         var additionalParameters = string.Join("&", parameters ?? []);
@@ -213,12 +238,19 @@ internal sealed class WatchdogService(
             return;
         }
 
+        var season = new HashSet<int>();
+        var sub = string.Empty;
         foreach (var entry in playlist.Entries)
         {
-            var title = Path.GetFileName(entry.Title);
-            var titlePath = Path.GetDirectoryName(entry.Title) ?? string.Empty;
-            var file = _fileNameParser.Parse(title).StrmFileName.ToSafeFileName(' ');
-            var path = Path.Combine(directory, titlePath, file);
+            var parseResult = _fileNameParser.Parse(entry.Title);
+            var file = parseResult.StrmFileName.ToSafeFileName(' ');
+
+            if (category == Category.Tv && parseResult.Season.HasValue && season.Add(parseResult.Season.Value))
+            {
+                sub = $"Season {parseResult.Season:D2}";
+            }
+
+            var path = Path.Combine(directory, sub, file);
             var url = $"{entry.Uri}";
             if (!string.IsNullOrEmpty(additionalParameters))
             {
@@ -230,16 +262,23 @@ internal sealed class WatchdogService(
             {
                 var name = Path.GetFileNameWithoutExtension(file);
                 var ext = Path.GetExtension(file);
-                path = Path.Combine(directory, titlePath, $"{name}.{i}{ext}");
+                path = Path.Combine(directory, sub, $"{name}.{i}{ext}");
                 i++;
             }
 
-            Directory.CreateDirectory(Path.Combine(directory, titlePath));
+            Directory.CreateDirectory(Path.Combine(directory, sub));
             await File.WriteAllTextAsync(path, url, cancellation).ConfigureAwait(false);
             logger.LogInformation("Playlist entry saved to {Location}", path);
         }
 
-        File.Create(Path.Combine(directory, hashFilename)).Close();
+        // multiseason playlist -> place hash to root
+        // otherwise to season folder
+        if (season.Count > 1)
+        {
+            sub = string.Empty;
+        }
+
+        File.Create(Path.Combine(directory, sub, hashFilename)).Close();
         logger.LogInformation("Hash file saved");
     }
 

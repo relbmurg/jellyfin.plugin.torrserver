@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -26,9 +28,9 @@ internal class ApiClient(HttpClient client, ILogger<ApiClient> logger) : IApiCli
         {
             var response = await client.PostAsync("/torrents", content, cancellation).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            var data = await response.Content.ReadFromJsonAsync<TorrentItem[]>(cancellation).ConfigureAwait(false);
+            var data = await response.Content.ReadFromJsonAsync<IEnumerable<TorrentItem>>(cancellation).ConfigureAwait(false);
 
-            return data ?? [];
+            return data?.OrderBy(x => x.Title).ToArray() ?? [];
         }
         catch (Exception exception)
         {

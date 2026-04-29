@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 #pragma warning disable SA1601
 
 namespace Jellyfin.Plugin.TorrServer.Core.Parser.Steps;
@@ -20,7 +21,8 @@ internal partial class ExtractEpisodeTag : IParsingStep
             var m = SxEFormat().Match(token);
             if (m.Success)
             {
-                context.SeasonEpisode = $"S{m.Groups["s"].Value}E{m.Groups["e"].Value}";
+                context.Season = ParseResult(m, "s");
+                context.Episode = ParseResult(m, "e");
                 context.Tokens.RemoveAt(index);
                 break;
             }
@@ -30,10 +32,16 @@ internal partial class ExtractEpisodeTag : IParsingStep
             m = XFormat().Match(token);
             if (m.Success)
             {
-                context.SeasonEpisode = $"S{m.Groups["s"].Value}E{m.Groups["e"].Value}";
+                context.Season = ParseResult(m, "s");
+                context.Episode = ParseResult(m, "e");
                 context.Tokens.RemoveAt(index);
                 break;
             }
         }
+    }
+
+    private static int? ParseResult(Match match, string group)
+    {
+        return int.TryParse(match.Groups[group].Value, NumberStyles.Integer, NumberFormatInfo.InvariantInfo,  out var result) ? result : null;
     }
 }

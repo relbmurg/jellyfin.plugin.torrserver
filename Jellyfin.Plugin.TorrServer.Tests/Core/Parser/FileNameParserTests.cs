@@ -220,7 +220,7 @@ public class FileNameParserTests
 
     [Test]
     [Arguments("Invasion.2021.S03E02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S03E02")]
-    [Arguments("Invasion.2021.3x02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S3E02")]
+    [Arguments("Invasion.2021.3x02.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S03E02")]
     [Arguments("Invasion.2021.01-10.The.Message.1080p.ATVP.WEB-DL.H.264-RGzsRutracker.mkv", "S01E10")]
     public async Task Parse_Should_Parse_SeasonEpisode(string input, string expected)
     {

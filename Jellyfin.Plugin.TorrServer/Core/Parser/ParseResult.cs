@@ -14,7 +14,13 @@ internal class ParseResult(ParsingContext context)
 
     public IReadOnlyList<string> TechnicalTags { get; } = context.TechnicalTags;
 
-    public string SeasonEpisodeTag { get; } = context.SeasonEpisode;
+    public int? Season { get; } = context.Season;
+
+    public int? Episode { get; } = context.Episode;
+
+    public string SeasonEpisodeTag =>
+        (Season.HasValue ? $"S{Season.Value:D2}" : string.Empty)
+        + (Episode.HasValue ? $"E{Episode.Value:D2}" : string.Empty);
 
     public string FolderName => Year.HasValue ? $"{Title} ({Year})" : Title;
 
